@@ -261,7 +261,7 @@ class PythonController(GenericControlBlock):
         self._print_counter = 0
 
         print(f"\n{'=' * 70}")
-        print(f" PYTHON CONTROLLER - Mode: {controller_mode} (ALIGNED WITH C)")
+        print(f" PYTHON CONTROLLER - Mode: {controller_mode}"  )
         print(f"  Using Python implementation (exact C behaviour)")
         print(f"{'=' * 70}")
         print(f"  Speed PI: Kp={self.Kp_speed}, Ki={self.Ki_speed}")
@@ -443,10 +443,6 @@ class PythonController(GenericControlBlock):
                 f"mode={mode_str}  "
                 f"ref={speed_ref_rpm:.1f} RPM  "
                 f"meas={speed_sensor_rpm:.1f} RPM  "
-                f"traj={self.trajectory.speed:.1f} RPM  "
-                f"mod={self.startup_modulation:.3f}  "
-                f"timer={self.startup_timer:.2f}s  "
-                f"obs_err={self.observer_angle_error:.4f}"
             )
 
         # ================================================================
