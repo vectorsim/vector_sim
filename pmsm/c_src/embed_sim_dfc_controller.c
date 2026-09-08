@@ -23,7 +23,7 @@
  * \note      EmbedSim naming convention:
  *              - Functions      : Pascal_Snake_Case
  *              - Parameters     : PascalCase
- *              - Output pointers: PascalCase_P
+ *              - Output pointers: PascalCasePtr
  *              - Local variables: Lower camelCase
  *              - Struct members : PascalCase
  *              - Macros         : UPPER_SNAKE_CASE

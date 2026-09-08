@@ -108,17 +108,16 @@ static MatrixFloat SVM_ClampFloat(MatrixFloat Value)
  */
 static SVM_Sector_T SVM_GetSectorFromAngle(MatrixFloat AngleRad)
 {
-    MatrixFloat angleNorm = AngleRad;
+    MatrixFloat angleNorm;
     SVM_Sector_T sector;
 
-    /* Normalize angle to [0, 2π) */
-    while (angleNorm < SVM_ZERO_F)
+    /* Normalize angle to [0, 2π) using fmodf */
+    angleNorm = fmodf(AngleRad, SVM_2PI_F);
+
+    /* Handle negative angles */
+    if (angleNorm < SVM_ZERO_F)
     {
         angleNorm += SVM_2PI_F;
-    }
-    while (angleNorm >= SVM_2PI_F)
-    {
-        angleNorm -= SVM_2PI_F;
     }
 
     /* Determine sector based on angle range */

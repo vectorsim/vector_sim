@@ -26,6 +26,26 @@
  *              - DEV-STM-004  Rule 10.3 : (uint32_T)TimeConst_1ms narrows uint64_T to 32 bits;
  *                             safe for all fSTM ≤ 4.3 GHz.  PRQA S 4342 applied.
  *
+ * \note        EmbedSim naming convention:
+ *              - Functions      : Pascal_Snake_Case
+ *              - Parameters     : PascalCase
+ *              - Output pointers: PascalCasePtr
+ *              - Local variables: Lower camelCase
+ *              - Struct members : PascalCase
+ *              - Macros         : UPPER_SNAKE_CASE
+ *              - Typedefs       : Pascal_Snake_Case_T
+ *
+ * \note        EmbedSim code style:
+ *              - Indentation    : 4 spaces (no tabs)
+ *              - Line width     : Max 120 characters
+ *              - Braces         : Same line for functions, next line for control structures
+ *              - Comments       : Doxygen style for documentation
+ *              - File headers   : Block comments with \file, \brief, \details, \note, \version, etc.
+ *              - Function docs  : \brief, \details, \param[in], \param[out], \return
+ *              - Pointer alignment: Type* const PtrName (space before *, no space after)
+ *              - Type suffix    : _T for typedefs, _G for global variables
+ *              - Constants      : UPPER_SNAKE_CASE
+ *
  * \copyright   Copyright (C) EmbedSim Project / Paul Abraham 2024
  *              https://github.com/vectorsim/embed_sim_project
  *              SPDX-License-Identifier: MIT
@@ -80,18 +100,18 @@ STATIC void CddStm_InitTimeTable(uint64_T StmFreq);
  */
 void Stm_00_Cmp_00_Isr(void)
 {
-    uint32_T entry_time = CddStm_GetTimeLow();   /* snapshot at ISR entry   */
-    uint32_T elapsed    = 0U;
-    uint32_T periods    = 0U;
-    uint32_T next_cmp   = 0U;
+    uint32_T entryTime = CddStm_GetTimeLow();   /* snapshot at ISR entry   */
+    uint32_T elapsed   = 0U;
+    uint32_T periods   = 0U;
+    uint32_T nextCmp   = 0U;
 
     System_Tick_Handler();
 
-    elapsed  = CddStm_GetTimeLow() - entry_time;                              /* wraps safely — uint32 modular arithmetic  */
+    elapsed  = CddStm_GetTimeLow() - entryTime;                               /* wraps safely — uint32 modular arithmetic  */
     periods  = (elapsed / (uint32_T)TimeConst_1ms) + 1U;                     /* PRQA S 4342 */ /* MD_STM_4342_TimeConst_1ms_32bit */
-    next_cmp = entry_time + (periods * (uint32_T)TimeConst_1ms);             /* PRQA S 4342 */ /* MD_STM_4342_TimeConst_1ms_32bit */
+    nextCmp  = entryTime + (periods * (uint32_T)TimeConst_1ms);              /* PRQA S 4342 */ /* MD_STM_4342_TimeConst_1ms_32bit */
 
-    STM0_CMP0.B.CMPVAL = next_cmp;
+    STM0_CMP0.B.CMPVAL = nextCmp;
     STM0_ISCR.B.CMP0IRR = 0x1U;   /* Clear STM compare interrupt flag */
 }
 
@@ -104,10 +124,10 @@ void Stm_00_Cmp_00_Isr(void)
  *------------------------------------------------------------------------------------------------------------------*/
 void CddStm_Init(void)
 {
-    uint64_T stm_freq;
+    uint64_T stmFreq;
 
-    stm_freq = (uint64_T)CddSys_GetStmFreq();
-    CddStm_InitTimeTable(stm_freq);
+    stmFreq = (uint64_T)CddSys_GetStmFreq();
+    CddStm_InitTimeTable(stmFreq);
 
     /* Configure STM0_CMCON: compare register 0, 32-bit compare width (MSTART=0, MSIZE=31) */
     STM0_CMCON.B.MSTART0 = 0x0U;
@@ -139,17 +159,17 @@ void CddStm_Init(void)
  *------------------------------------------------------------------------------------------------------------------*/
 uint64_T CddStm_GetTime(void)
 {
-    uint64_T lower_sys_time;
-    uint64_T upper_sys_time;
+    uint64_T lowerSysTime;
+    uint64_T upperSysTime;
 
     /* Read TIM0 first — hardware latches upper bits into CAP (ds2 P.60) */
-    lower_sys_time = (uint64_T)STM0_TIM0.U; /* PRQA S 0303 */
-    upper_sys_time = (uint64_T)STM0_CAP.U;  /* PRQA S 0303 */
+    lowerSysTime = (uint64_T)STM0_TIM0.U; /* PRQA S 0303 */
+    upperSysTime = (uint64_T)STM0_CAP.U;  /* PRQA S 0303 */
 
     /* Reconstruct: CAP holds bits [63:32]; TIM0 holds bits [31:0] */
-    upper_sys_time = (upper_sys_time << 0x20U) | lower_sys_time;
+    upperSysTime = (upperSysTime << 0x20U) | lowerSysTime;
 
-    return upper_sys_time;
+    return upperSysTime;
 }
 
 /*--------------------------------------------------------------------------------------------------------------------
@@ -168,29 +188,29 @@ uint32_T CddStm_GetTimeLow(void)
  *------------------------------------------------------------------------------------------------------------------*/
 uint64_T CddStm_GetDeadline(uint64_T TimeOut)
 {
-    uint64_T dead_line = CddStm_GetTime() + TimeOut;
+    uint64_T deadline = CddStm_GetTime() + TimeOut;
 
-    return dead_line;
+    return deadline;
 }
 
 /*--------------------------------------------------------------------------------------------------------------------
  * CddStm_IsDeadlineElapsed
  *
- * MISRA Rule 14.4: `now > dead_line` produces an essentially Boolean result
+ * MISRA Rule 14.4: `now > deadline` produces an essentially Boolean result
  * assigned to uint32_T.  Explicit 0x0U / 0x1U encoding avoids an implicit
  * Boolean-to-integer conversion warning.
  *------------------------------------------------------------------------------------------------------------------*/
-uint32_T CddStm_IsDeadlineElapsed(uint64_T DeadLine)
+uint32_T CddStm_IsDeadlineElapsed(uint64_T Deadline)
 {
-    uint64_T now        = CddStm_GetTime();
-    uint32_T is_elapsed = 0x0U;
+    uint64_T now       = CddStm_GetTime();
+    uint32_T isElapsed = 0x0U;
 
-    if (now > DeadLine)
+    if (now > Deadline)
     {
-        is_elapsed = 0x1U;
+        isElapsed = 0x1U;
     }
 
-    return is_elapsed;
+    return isElapsed;
 }
 
 /*--------------------------------------------------------------------------------------------------------------------
@@ -212,9 +232,9 @@ uint32_T CddStm_IsDeadlineElapsed(uint64_T DeadLine)
  *------------------------------------------------------------------------------------------------------------------*/
 void CddStm_Delay_Us(uint32_T Microseconds)
 {
-    uint64_T deadLine = CddStm_GetDeadline((uint64_T)Microseconds * TimeConst_1us);
+    uint64_T deadline = CddStm_GetDeadline((uint64_T)Microseconds * TimeConst_1us);
 
-    while (CddStm_IsDeadlineElapsed(deadLine) == 0x0U)
+    while (CddStm_IsDeadlineElapsed(deadline) == 0x0U)
     {
         CddSys_NopDelay(1U, 1U);
     }
@@ -232,7 +252,7 @@ void CddStm_Delay_Us(uint32_T Microseconds)
  *   10 ns  →  3 ticks  (300 000 000 / 100 000 000)
  *   10 s   →  3 000 000 000 ticks  (fits uint64)
  *
- * MISRA Rule 7.2 / 10.3: Divisors on the right are uint32 literals; stm_freq
+ * MISRA Rule 7.2 / 10.3: Divisors on the right are uint32 literals; stmFreq
  * (uint64_T) is promoted in the division — no truncation in the dividend.
  *------------------------------------------------------------------------------------------------------------------*/
 STATIC void CddStm_InitTimeTable(uint64_T StmFreq)

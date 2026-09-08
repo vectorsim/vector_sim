@@ -760,7 +760,7 @@ void CddEvadc_ConfigG01VroUdc(void)
  * is clear the previous value is retained (Rule 15.7 documented else).
  *********************************************************************************************************************/
 
-static void CddEvadc_ReadVro(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DATA) CddAppPtr)
+void CddEvadc_ReadVro(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DATA) CddAppPtr)
 {
     Ifx_EVADC_G_RES Res;
 
@@ -776,7 +776,7 @@ static void CddEvadc_ReadVro(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DATA) 
     }
 }
 
-static void CddEvadc_ReadPhaseU(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DATA) CddAppPtr)
+void CddEvadc_ReadPhaseU(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DATA) CddAppPtr)
 {
     Ifx_EVADC_G_RES Res;
 
@@ -794,7 +794,7 @@ static void CddEvadc_ReadPhaseU(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DAT
     }
 }
 
-static void CddEvadc_ReadPhaseV(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DATA) CddAppPtr)
+void CddEvadc_ReadPhaseV(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DATA) CddAppPtr)
 {
     Ifx_EVADC_G_RES Res;
 
@@ -811,7 +811,7 @@ static void CddEvadc_ReadPhaseV(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DAT
     }
 }
 
-static void CddEvadc_ReadPhaseW(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DATA) CddAppPtr)
+void CddEvadc_ReadPhaseW(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DATA) CddAppPtr)
 {
     Ifx_EVADC_G_RES Res;
 
@@ -830,7 +830,7 @@ static void CddEvadc_ReadPhaseW(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DAT
     }
 }
 
-static void CddEvadc_ReadDcLink(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DATA) CddAppPtr)
+void CddEvadc_ReadDcLink(P2VAR(volatile CddApp_T, AUTOMATIC, CDD_APPL_DATA) CddAppPtr)
 {
     Ifx_EVADC_G_RES Res;
 

@@ -1,10 +1,36 @@
 /**********************************************************************************************************************
  * \file      embed_sim_coordinate_transform.h
  * \brief     Clarke, Park, Inverse-Park and Inverse-Clarke transforms for FOC motor control.
- *            Matrix-based implementation using EmbedSim matrix library.
  *
  * \details   All transforms use matrix operations from embed_sim_matrix.h for
- *            clarity and maintainability.
+ *            clarity and maintainability. Matrix-based implementation using
+ *            EmbedSim matrix library.
+ *
+ * \note      MISRA C:2012 compliance:
+ *              - Rule  8.5 : One declaration per identifier.
+ *              - Rule  8.6 : No definitions in header files.
+ *              - Rule 17.2 : No recursion.
+ *              - Rule 14.7 : Single return point.
+ *
+ * \note      EmbedSim naming convention:
+ *              - Functions      : Pascal_Snake_Case
+ *              - Parameters     : PascalCase
+ *              - Output pointers: PascalCasePtr
+ *              - Local variables: Lower camelCase
+ *              - Struct members : PascalCase
+ *              - Macros         : UPPER_SNAKE_CASE
+ *              - Typedefs       : Pascal_Snake_Case_T
+ *
+ * \note      EmbedSim code style:
+ *              - Indentation    : 4 spaces (no tabs)
+ *              - Line width     : Max 120 characters
+ *              - Braces         : Same line for functions, next line for control structures
+ *              - Comments       : Doxygen style for documentation
+ *              - File headers   : Block comments with \file, \brief, \details, \note, \version, etc.
+ *              - Function docs  : \brief, \details, \param[in], \param[out], \return
+ *              - Pointer alignment: Type* const PtrName (space before *, no space after)
+ *              - Type suffix    : _T for typedefs, _G for global variables
+ *              - Constants      : UPPER_SNAKE_CASE
  *
  * \version   2.1.0
  * \date      2025-05-24
@@ -27,7 +53,7 @@
  * Transform Matrices Dimensions
  *********************************************************************************************************************/
 #define CLARKE_ROWS      (2U)    /**< Clarke output: Alpha, Beta          */
-#define CLARKE_COLS      (3U)    /**< Clarke input: U, V, W               */  /* <-- CHANGED from 2 to 3 */
+#define CLARKE_COLS      (3U)    /**< Clarke input: U, V, W               */
 #define PARK_ROWS        (2U)    /**< Park output: D, Q                   */
 #define PARK_COLS        (2U)    /**< Park input: Alpha, Beta             */
 #define INV_PARK_ROWS    (2U)    /**< Inverse-Park output: Alpha, Beta    */
@@ -57,8 +83,8 @@ extern void Transform_Init(void);
  *                                       [W]
  * \endcode
  *
- * \param[in]  In_P   UVW phase signals (must not be NULL)
- * \param[out] Out_P  αβ output (must not be NULL)
+ * \param[in]  InPtr   UVW phase signals (must not be NULL)
+ * \param[out] OutPtr  αβ output (must not be NULL)
  * \return  MATRIX_SUCCESS or error code
  */
 extern MatrixStatus_T Clarke_Transform_Matrix(const FocUvw_T* const InPtr, FocAlphaBeta_T* const OutPtr);
@@ -72,15 +98,12 @@ extern MatrixStatus_T Clarke_Transform_Matrix(const FocUvw_T* const InPtr, FocAl
  *   [Q]   [-sin(θ)  cos(θ)]   [Beta]
  * \endcode
  *
- * \param[in]  In_P     αβ input (must not be NULL)
- * \param[in]  Angle_P  Electrical rotor angle (must not be NULL)
- * \param[out] Out_P    dq output (must not be NULL)
+ * \param[in]  InPtr    αβ input (must not be NULL)
+ * \param[in]  AnglePtr Electrical rotor angle (must not be NULL)
+ * \param[out] OutPtr   dq output (must not be NULL)
  * \return  MATRIX_SUCCESS or error code
  */
-extern MatrixStatus_T Park_Transform_Matrix(
-    const FocAlphaBeta_T * const InPtr,
-    const FocAngle_T     * const Angle_P,
-    FocDq_T              * const OutPtr);
+extern MatrixStatus_T Park_Transform_Matrix(const FocAlphaBeta_T* const InPtr, const FocAngle_T* const AnglePtr, FocDq_T* const OutPtr);
 
 /**
  * \brief   Apply the Inverse-Park transform using matrix multiplication.
@@ -91,15 +114,12 @@ extern MatrixStatus_T Park_Transform_Matrix(
  *   [Beta]    [sin(θ)    cos(θ)]   [Q]
  * \endcode
  *
- * \param[in]  In_P     dq input (must not be NULL)
- * \param[in]  Angle_P  Electrical rotor angle (must not be NULL)
- * \param[out] Out_P    αβ output (must not be NULL)
+ * \param[in]  InPtr    dq input (must not be NULL)
+ * \param[in]  AnglePtr Electrical rotor angle (must not be NULL)
+ * \param[out] OutPtr   αβ output (must not be NULL)
  * \return  MATRIX_SUCCESS or error code
  */
-extern MatrixStatus_T InvPark_Transform_Matrix(
-    const FocDq_T        * const InPtr,
-    const FocAngle_T     * const Angle_P,
-    FocAlphaBeta_T       * const OutPtr);
+extern MatrixStatus_T InvPark_Transform_Matrix(const FocDq_T* const InPtr, const FocAngle_T* const AnglePtr, FocAlphaBeta_T* const OutPtr);
 
 /**
  * \brief   Apply the Inverse-Clarke transform using matrix multiplication.
@@ -111,12 +131,10 @@ extern MatrixStatus_T InvPark_Transform_Matrix(
  *   [W]   [-1/2    -√3/2]
  * \endcode
  *
- * \param[in]  In_P   αβ input (must not be NULL)
- * \param[out] Out_P  UVW output (must not be NULL)
+ * \param[in]  InPtr   αβ input (must not be NULL)
+ * \param[out] OutPtr  UVW output (must not be NULL)
  * \return  MATRIX_SUCCESS or error code
  */
-extern MatrixStatus_T InvClarke_Transform_Matrix(
-    const FocAlphaBeta_T * const InPtr,
-    FocUvw_T             * const OutPtr);
+extern MatrixStatus_T InvClarke_Transform_Matrix(const FocAlphaBeta_T* const InPtr, FocUvw_T* const OutPtr);
 
 #endif /* EMBED_SIM_COORDINATE_TRANSFORM_H_ */

@@ -46,7 +46,7 @@ from embedsim_control_block import EmbedSimControlBlock, SIM_CTRL_DFC
 T_SIM = 10.0
 DT = 50e-6
 V_DC = 12.0
-TARGET_RPM =  -850.0
+TARGET_RPM =  850.0
 STEP_TIME = 0.01
 
 # Motor parameters (Python plant)

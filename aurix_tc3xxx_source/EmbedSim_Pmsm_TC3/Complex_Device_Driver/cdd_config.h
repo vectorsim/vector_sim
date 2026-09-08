@@ -58,7 +58,7 @@
 #define CORE_00_ADC_PHASE_W_SRPN                (92U)
 #define CORE_00_ADC_DC_LINK                     (95U)
 #define CORE_00_GPT12_ENCODER_ZERO_SRPN         (100U)
-#define CORE_00_GPT12_ENCODER_ZERO_SRPN1        (101U)
+
 
 /**********************************************************************************************************************
  * GTM Software Dead-Time  [CLK0 ticks]

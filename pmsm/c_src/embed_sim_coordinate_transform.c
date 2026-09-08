@@ -6,6 +6,31 @@
  * \details   All transforms use matrix multiplication from embed_sim_matrix.h
  *            for clarity and code reuse.
  *
+ * \note      MISRA C:2012 compliance:
+ *              - Rule  8.5 : One declaration per identifier.
+ *              - Rule  8.6 : No definitions in header files.
+ *              - Rule 17.2 : No recursion.
+ *              - Rule 14.7 : Single return point.
+ *
+ * \note      EmbedSim naming convention:
+ *              - Functions      : Pascal_Snake_Case
+ *              - Parameters     : PascalCase
+ *              - Output pointers: PascalCasePtr
+ *              - Local variables: Lower camelCase
+ *              - Struct members : PascalCase
+ *              - Macros         : UPPER_SNAKE_CASE
+ *              - Typedefs       : Pascal_Snake_Case_T
+ *
+ * \note      EmbedSim code style:
+ *              - Indentation    : 4 spaces (no tabs)
+ *              - Line width     : Max 120 characters
+ *              - Braces         : Same line for functions, next line for control structures *              - Comments       : Doxygen style for documentation
+ *              - File headers   : Block comments with \file, \brief, \details, \note, \version, etc.
+ *              - Function docs  : \brief, \details, \param[in], \param[out], \return
+ *              - Pointer alignment: Type* const PtrName (space before *, no space after)
+ *              - Type suffix    : _T for typedefs, _G for global variables
+ *              - Constants      : UPPER_SNAKE_CASE
+ *
  * \version   2.1.0
  * \date      2025-05-24
  * \author    EmbedSim / EV Light Vehicle Foundation
@@ -25,31 +50,25 @@
 /**********************************************************************************************************************
  * Module-Private Matrix Buffers (static allocation)
  *
- * static gives these file scope only — not visible outside this TU.
+ * static gives these file scope only — not visible outside this translation unit.
  * Naming: UPPER_SNAKE_CASE prefix + _G suffix per EmbedSim convention.
  *********************************************************************************************************************/
-static MatrixElement Clarke_Matrix_Data_G[CLARKE_ROWS * CLARKE_COLS];
-static MatrixElement Inv_Clarke_Matrix_Data_G[INV_CLARKE_ROWS * INV_CLARKE_COLS];
-static MatrixElement Park_Cos_Matrix_Data_G[PARK_ROWS * PARK_COLS];
-static MatrixElement Park_Sin_Matrix_Data_G[PARK_ROWS * PARK_COLS];
-static MatrixElement Inv_Park_Cos_Matrix_Data_G[INV_PARK_ROWS * INV_PARK_COLS];
-static MatrixElement Inv_Park_Sin_Matrix_Data_G[INV_PARK_ROWS * INV_PARK_COLS];
+static MatrixElement clarkeMatrixData_G[CLARKE_ROWS * CLARKE_COLS];
+static MatrixElement invClarkeMatrixData_G[INV_CLARKE_ROWS * INV_CLARKE_COLS];
+static MatrixElement parkCosMatrixData_G[PARK_ROWS * PARK_COLS];
+static MatrixElement parkSinMatrixData_G[PARK_ROWS * PARK_COLS];
+static MatrixElement invParkCosMatrixData_G[INV_PARK_ROWS * INV_PARK_COLS];
+static MatrixElement invParkSinMatrixData_G[INV_PARK_ROWS * INV_PARK_COLS];
 
 /**********************************************************************************************************************
  * Module-Private Matrix Handles
  *********************************************************************************************************************/
-static Matrix_T Clarke_Matrix_G;
-static Matrix_T Inv_Clarke_Matrix_G;
-static Matrix_T Park_Cos_Matrix_G;
-static Matrix_T Park_Sin_Matrix_G;
-static Matrix_T Inv_Park_Cos_Matrix_G;
-static Matrix_T Inv_Park_Sin_Matrix_G;
-
-/**********************************************************************************************************************
- * Private Helper Functions
- *********************************************************************************************************************/
-/* All coordinate conversions are performed inline within each public function.
- * No module-private helpers are currently required.                           */
+static Matrix_T clarkeMatrix_G;
+static Matrix_T invClarkeMatrix_G;
+static Matrix_T parkCosMatrix_G;
+static Matrix_T parkSinMatrix_G;
+static Matrix_T invParkCosMatrix_G;
+static Matrix_T invParkSinMatrix_G;
 
 /**********************************************************************************************************************
  * Public Functions
@@ -60,32 +79,32 @@ static Matrix_T Inv_Park_Sin_Matrix_G;
  *------------------------------------------------------------------------------------------------------------------*/
 void Transform_Init(void)
 {
-    /* --- CHANGED: Full Clarke transform matrix (2×3) ---
+    /* Full Clarke transform matrix (2×3):
      * [ 2/3,  -1/3,  -1/3 ]
      * [ 0,     1/√3, -1/√3 ]
      */
-    Matrix_Init(&Clarke_Matrix_G, Clarke_Matrix_Data_G, CLARKE_ROWS, CLARKE_COLS);
-    Matrix_SetElementFloat(&Clarke_Matrix_G, 0U, 0U,  2.0f / 3.0f);          /* 2/3  */
-    Matrix_SetElementFloat(&Clarke_Matrix_G, 0U, 1U, -1.0f / 3.0f);          /* -1/3 */
-    Matrix_SetElementFloat(&Clarke_Matrix_G, 0U, 2U, -1.0f / 3.0f);          /* -1/3 */
-    Matrix_SetElementFloat(&Clarke_Matrix_G, 1U, 0U,  0.0f);                 /* 0    */
-    Matrix_SetElementFloat(&Clarke_Matrix_G, 1U, 1U,  ES_MATH_INV_SQRT3_F);  /* 1/√3 */
-    Matrix_SetElementFloat(&Clarke_Matrix_G, 1U, 2U, -ES_MATH_INV_SQRT3_F);  /* -1/√3 */
+    Matrix_Init(&clarkeMatrix_G, clarkeMatrixData_G, CLARKE_ROWS, CLARKE_COLS);
+    Matrix_SetElementFloat(&clarkeMatrix_G, 0U, 0U,  2.0f / 3.0f);          /* 2/3  */
+    Matrix_SetElementFloat(&clarkeMatrix_G, 0U, 1U, -1.0f / 3.0f);          /* -1/3 */
+    Matrix_SetElementFloat(&clarkeMatrix_G, 0U, 2U, -1.0f / 3.0f);          /* -1/3 */
+    Matrix_SetElementFloat(&clarkeMatrix_G, 1U, 0U,  0.0f);                 /* 0    */
+    Matrix_SetElementFloat(&clarkeMatrix_G, 1U, 1U,  ES_MATH_INV_SQRT3_F);  /* 1/√3 */
+    Matrix_SetElementFloat(&clarkeMatrix_G, 1U, 2U, -ES_MATH_INV_SQRT3_F);  /* -1/√3 */
 
-    /* Initialize Inverse-Clarke transform matrix (unchanged) */
-    Matrix_Init(&Inv_Clarke_Matrix_G, Inv_Clarke_Matrix_Data_G, INV_CLARKE_ROWS, INV_CLARKE_COLS);
-    Matrix_SetElementFloat(&Inv_Clarke_Matrix_G, 0U, 0U,  ES_MATH_ONE_F);
-    Matrix_SetElementFloat(&Inv_Clarke_Matrix_G, 0U, 1U,  0.0f);
-    Matrix_SetElementFloat(&Inv_Clarke_Matrix_G, 1U, 0U, -ES_MATH_HALF_F);
-    Matrix_SetElementFloat(&Inv_Clarke_Matrix_G, 1U, 1U,  ES_MATH_HALF_SQRT3_F);
-    Matrix_SetElementFloat(&Inv_Clarke_Matrix_G, 2U, 0U, -ES_MATH_HALF_F);
-    Matrix_SetElementFloat(&Inv_Clarke_Matrix_G, 2U, 1U, -ES_MATH_HALF_SQRT3_F);
+    /* Initialize Inverse-Clarke transform matrix */
+    Matrix_Init(&invClarkeMatrix_G, invClarkeMatrixData_G, INV_CLARKE_ROWS, INV_CLARKE_COLS);
+    Matrix_SetElementFloat(&invClarkeMatrix_G, 0U, 0U,  ES_MATH_ONE_F);
+    Matrix_SetElementFloat(&invClarkeMatrix_G, 0U, 1U,  0.0f);
+    Matrix_SetElementFloat(&invClarkeMatrix_G, 1U, 0U, -ES_MATH_HALF_F);
+    Matrix_SetElementFloat(&invClarkeMatrix_G, 1U, 1U,  ES_MATH_HALF_SQRT3_F);
+    Matrix_SetElementFloat(&invClarkeMatrix_G, 2U, 0U, -ES_MATH_HALF_F);
+    Matrix_SetElementFloat(&invClarkeMatrix_G, 2U, 1U, -ES_MATH_HALF_SQRT3_F);
 
     /* Initialize Park matrices (will be updated per transform call) */
-    Matrix_Init(&Park_Cos_Matrix_G, Park_Cos_Matrix_Data_G, PARK_ROWS, PARK_COLS);
-    Matrix_Init(&Park_Sin_Matrix_G, Park_Sin_Matrix_Data_G, PARK_ROWS, PARK_COLS);
-    Matrix_Init(&Inv_Park_Cos_Matrix_G, Inv_Park_Cos_Matrix_Data_G, INV_PARK_ROWS, INV_PARK_COLS);
-    Matrix_Init(&Inv_Park_Sin_Matrix_G, Inv_Park_Sin_Matrix_Data_G, INV_PARK_ROWS, INV_PARK_COLS);
+    Matrix_Init(&parkCosMatrix_G, parkCosMatrixData_G, PARK_ROWS, PARK_COLS);
+    Matrix_Init(&parkSinMatrix_G, parkSinMatrixData_G, PARK_ROWS, PARK_COLS);
+    Matrix_Init(&invParkCosMatrix_G, invParkCosMatrixData_G, INV_PARK_ROWS, INV_PARK_COLS);
+    Matrix_Init(&invParkSinMatrix_G, invParkSinMatrixData_G, INV_PARK_ROWS, INV_PARK_COLS);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------
@@ -107,7 +126,7 @@ MatrixStatus_T Clarke_Transform_Matrix(const FocUvw_T* const InPtr, FocAlphaBeta
     }
     else
     {
-        /* --- CHANGED: Create input vector [U; V; W] (3×1) --- */
+        /* Create input vector [U; V; W] (3×1) */
         Matrix_Init(&inputVec, inputBuffer, CLARKE_COLS, 1U);
         Matrix_SetElementFloat(&inputVec, 0U, 0U, InPtr->U);
         Matrix_SetElementFloat(&inputVec, 1U, 0U, InPtr->V);
@@ -117,7 +136,7 @@ MatrixStatus_T Clarke_Transform_Matrix(const FocUvw_T* const InPtr, FocAlphaBeta
         Matrix_Init(&outputVec, outputBuffer, CLARKE_ROWS, 1U);
 
         /* Multiply: output = Clarke_matrix (2×3) × input (3×1) = output (2×1) */
-        status = Matrix_Multiply(&Clarke_Matrix_G, &inputVec, &outputVec);
+        status = Matrix_Multiply(&clarkeMatrix_G, &inputVec, &outputVec);
 
         if (status == MATRIX_SUCCESS)
         {
@@ -126,7 +145,7 @@ MatrixStatus_T Clarke_Transform_Matrix(const FocUvw_T* const InPtr, FocAlphaBeta
         }
         else
         {
-            /* Multiplication failed */
+            /* Multiplication failed — status already set */
         }
     }
 
@@ -137,55 +156,55 @@ MatrixStatus_T Clarke_Transform_Matrix(const FocUvw_T* const InPtr, FocAlphaBeta
  * Park_Transform_Matrix
  *------------------------------------------------------------------------------------------------------------------*/
 MatrixStatus_T Park_Transform_Matrix(
-    const FocAlphaBeta_T * const In_P,
-    const FocAngle_T     * const Angle_P,
-    FocDq_T              * const Out_P)
+    const FocAlphaBeta_T* const InPtr,
+    const FocAngle_T* const AnglePtr,
+    FocDq_T* const OutPtr)
 {
     MatrixStatus_T status;
-    MatrixElement     input_buffer[PARK_COLS];
-    MatrixElement     output_buffer[PARK_ROWS];
-    Matrix_T       input_vec;
-    Matrix_T       output_vec;
-    MatrixFloat       cos_theta;
-    MatrixFloat       sin_theta;
+    MatrixElement  inputBuffer[PARK_COLS];
+    MatrixElement  outputBuffer[PARK_ROWS];
+    Matrix_T       inputVec;
+    Matrix_T       outputVec;
+    MatrixFloat    cosTheta;
+    MatrixFloat    sinTheta;
 
     status = MATRIX_SUCCESS;
 
-    if ((In_P == NULL) || (Angle_P == NULL) || (Out_P == NULL))
+    if ((InPtr == NULL) || (AnglePtr == NULL) || (OutPtr == NULL))
     {
         status = MATRIX_ERROR_NULL_PTR;
     }
     else
     {
         /* Compute sin and cos of electrical angle */
-        cos_theta = cosf(Angle_P->ThetaE);
-        sin_theta = sinf(Angle_P->ThetaE);
+        cosTheta = cosf(AnglePtr->ThetaE);
+        sinTheta = sinf(AnglePtr->ThetaE);
 
         /* Build Park transform matrix: [cosθ, sinθ; -sinθ, cosθ] */
-        Matrix_SetElementFloat(&Park_Cos_Matrix_G, 0U, 0U,  cos_theta);
-        Matrix_SetElementFloat(&Park_Cos_Matrix_G, 0U, 1U,  sin_theta);
-        Matrix_SetElementFloat(&Park_Cos_Matrix_G, 1U, 0U, -sin_theta);
-        Matrix_SetElementFloat(&Park_Cos_Matrix_G, 1U, 1U,  cos_theta);
+        Matrix_SetElementFloat(&parkCosMatrix_G, 0U, 0U,  cosTheta);
+        Matrix_SetElementFloat(&parkCosMatrix_G, 0U, 1U,  sinTheta);
+        Matrix_SetElementFloat(&parkCosMatrix_G, 1U, 0U, -sinTheta);
+        Matrix_SetElementFloat(&parkCosMatrix_G, 1U, 1U,  cosTheta);
 
         /* Create input vector [Alpha; Beta] (2×1) */
-        Matrix_Init(&input_vec, input_buffer, PARK_COLS, 1U);
-        Matrix_SetElementFloat(&input_vec, 0U, 0U, In_P->Alpha);
-        Matrix_SetElementFloat(&input_vec, 1U, 0U, In_P->Beta);
+        Matrix_Init(&inputVec, inputBuffer, PARK_COLS, 1U);
+        Matrix_SetElementFloat(&inputVec, 0U, 0U, InPtr->Alpha);
+        Matrix_SetElementFloat(&inputVec, 1U, 0U, InPtr->Beta);
 
         /* Create output vector (2×1) */
-        Matrix_Init(&output_vec, output_buffer, PARK_ROWS, 1U);
+        Matrix_Init(&outputVec, outputBuffer, PARK_ROWS, 1U);
 
         /* Multiply: output = Park_matrix × input */
-        status = Matrix_Multiply(&Park_Cos_Matrix_G, &input_vec, &output_vec);
+        status = Matrix_Multiply(&parkCosMatrix_G, &inputVec, &outputVec);
 
         if (status == MATRIX_SUCCESS)
         {
-            Matrix_GetElementFloat(&output_vec, 0U, 0U, &Out_P->D);
-            Matrix_GetElementFloat(&output_vec, 1U, 0U, &Out_P->Q);
+            Matrix_GetElementFloat(&outputVec, 0U, 0U, &OutPtr->D);
+            Matrix_GetElementFloat(&outputVec, 1U, 0U, &OutPtr->Q);
         }
         else
         {
-            /* Multiplication failed */
+            /* Multiplication failed — status already set */
         }
     }
 
@@ -196,55 +215,55 @@ MatrixStatus_T Park_Transform_Matrix(
  * InvPark_Transform_Matrix
  *------------------------------------------------------------------------------------------------------------------*/
 MatrixStatus_T InvPark_Transform_Matrix(
-    const FocDq_T        * const In_P,
-    const FocAngle_T     * const Angle_P,
-    FocAlphaBeta_T       * const Out_P)
+    const FocDq_T* const InPtr,
+    const FocAngle_T* const AnglePtr,
+    FocAlphaBeta_T* const OutPtr)
 {
     MatrixStatus_T status;
-    MatrixElement     input_buffer[INV_PARK_COLS];
-    MatrixElement     output_buffer[INV_PARK_ROWS];
-    Matrix_T       input_vec;
-    Matrix_T       output_vec;
-    MatrixFloat       cos_theta;
-    MatrixFloat       sin_theta;
+    MatrixElement  inputBuffer[INV_PARK_COLS];
+    MatrixElement  outputBuffer[INV_PARK_ROWS];
+    Matrix_T       inputVec;
+    Matrix_T       outputVec;
+    MatrixFloat    cosTheta;
+    MatrixFloat    sinTheta;
 
     status = MATRIX_SUCCESS;
 
-    if ((In_P == NULL) || (Angle_P == NULL) || (Out_P == NULL))
+    if ((InPtr == NULL) || (AnglePtr == NULL) || (OutPtr == NULL))
     {
         status = MATRIX_ERROR_NULL_PTR;
     }
     else
     {
         /* Compute sin and cos of electrical angle */
-        cos_theta = cosf(Angle_P->ThetaE);
-        sin_theta = sinf(Angle_P->ThetaE);
+        cosTheta = cosf(AnglePtr->ThetaE);
+        sinTheta = sinf(AnglePtr->ThetaE);
 
         /* Build Inverse-Park transform matrix: [cosθ, -sinθ; sinθ, cosθ] */
-        Matrix_SetElementFloat(&Inv_Park_Cos_Matrix_G, 0U, 0U,  cos_theta);
-        Matrix_SetElementFloat(&Inv_Park_Cos_Matrix_G, 0U, 1U, -sin_theta);
-        Matrix_SetElementFloat(&Inv_Park_Cos_Matrix_G, 1U, 0U,  sin_theta);
-        Matrix_SetElementFloat(&Inv_Park_Cos_Matrix_G, 1U, 1U,  cos_theta);
+        Matrix_SetElementFloat(&invParkCosMatrix_G, 0U, 0U,  cosTheta);
+        Matrix_SetElementFloat(&invParkCosMatrix_G, 0U, 1U, -sinTheta);
+        Matrix_SetElementFloat(&invParkCosMatrix_G, 1U, 0U,  sinTheta);
+        Matrix_SetElementFloat(&invParkCosMatrix_G, 1U, 1U,  cosTheta);
 
         /* Create input vector [D; Q] (2×1) */
-        Matrix_Init(&input_vec, input_buffer, INV_PARK_COLS, 1U);
-        Matrix_SetElementFloat(&input_vec, 0U, 0U, In_P->D);
-        Matrix_SetElementFloat(&input_vec, 1U, 0U, In_P->Q);
+        Matrix_Init(&inputVec, inputBuffer, INV_PARK_COLS, 1U);
+        Matrix_SetElementFloat(&inputVec, 0U, 0U, InPtr->D);
+        Matrix_SetElementFloat(&inputVec, 1U, 0U, InPtr->Q);
 
         /* Create output vector (2×1) */
-        Matrix_Init(&output_vec, output_buffer, INV_PARK_ROWS, 1U);
+        Matrix_Init(&outputVec, outputBuffer, INV_PARK_ROWS, 1U);
 
         /* Multiply: output = InvPark_matrix × input */
-        status = Matrix_Multiply(&Inv_Park_Cos_Matrix_G, &input_vec, &output_vec);
+        status = Matrix_Multiply(&invParkCosMatrix_G, &inputVec, &outputVec);
 
         if (status == MATRIX_SUCCESS)
         {
-            Matrix_GetElementFloat(&output_vec, 0U, 0U, &Out_P->Alpha);
-            Matrix_GetElementFloat(&output_vec, 1U, 0U, &Out_P->Beta);
+            Matrix_GetElementFloat(&outputVec, 0U, 0U, &OutPtr->Alpha);
+            Matrix_GetElementFloat(&outputVec, 1U, 0U, &OutPtr->Beta);
         }
         else
         {
-            /* Multiplication failed */
+            /* Multiplication failed — status already set */
         }
     }
 
@@ -255,43 +274,43 @@ MatrixStatus_T InvPark_Transform_Matrix(
  * InvClarke_Transform_Matrix
  *------------------------------------------------------------------------------------------------------------------*/
 MatrixStatus_T InvClarke_Transform_Matrix(
-    const FocAlphaBeta_T * const In_P,
-    FocUvw_T             * const Out_P)
+    const FocAlphaBeta_T* const InPtr,
+    FocUvw_T* const OutPtr)
 {
     MatrixStatus_T status;
-    MatrixElement     input_buffer[INV_CLARKE_COLS];
-    MatrixElement     output_buffer[INV_CLARKE_ROWS];
-    Matrix_T       input_vec;
-    Matrix_T       output_vec;
+    MatrixElement  inputBuffer[INV_CLARKE_COLS];
+    MatrixElement  outputBuffer[INV_CLARKE_ROWS];
+    Matrix_T       inputVec;
+    Matrix_T       outputVec;
 
     status = MATRIX_SUCCESS;
 
-    if ((In_P == NULL) || (Out_P == NULL))
+    if ((InPtr == NULL) || (OutPtr == NULL))
     {
         status = MATRIX_ERROR_NULL_PTR;
     }
     else
     {
         /* Create input vector [Alpha; Beta] (2×1) */
-        Matrix_Init(&input_vec, input_buffer, INV_CLARKE_COLS, 1U);
-        Matrix_SetElementFloat(&input_vec, 0U, 0U, In_P->Alpha);
-        Matrix_SetElementFloat(&input_vec, 1U, 0U, In_P->Beta);
+        Matrix_Init(&inputVec, inputBuffer, INV_CLARKE_COLS, 1U);
+        Matrix_SetElementFloat(&inputVec, 0U, 0U, InPtr->Alpha);
+        Matrix_SetElementFloat(&inputVec, 1U, 0U, InPtr->Beta);
 
         /* Create output vector (3×1) */
-        Matrix_Init(&output_vec, output_buffer, INV_CLARKE_ROWS, 1U);
+        Matrix_Init(&outputVec, outputBuffer, INV_CLARKE_ROWS, 1U);
 
         /* Multiply: output = InvClarke_matrix × input */
-        status = Matrix_Multiply(&Inv_Clarke_Matrix_G, &input_vec, &output_vec);
+        status = Matrix_Multiply(&invClarkeMatrix_G, &inputVec, &outputVec);
 
         if (status == MATRIX_SUCCESS)
         {
-            Matrix_GetElementFloat(&output_vec, 0U, 0U, &Out_P->U);
-            Matrix_GetElementFloat(&output_vec, 1U, 0U, &Out_P->V);
-            Matrix_GetElementFloat(&output_vec, 2U, 0U, &Out_P->W);
+            Matrix_GetElementFloat(&outputVec, 0U, 0U, &OutPtr->U);
+            Matrix_GetElementFloat(&outputVec, 1U, 0U, &OutPtr->V);
+            Matrix_GetElementFloat(&outputVec, 2U, 0U, &OutPtr->W);
         }
         else
         {
-            /* Multiplication failed */
+            /* Multiplication failed — status already set */
         }
     }
 

@@ -144,8 +144,8 @@ void CddApp_Init(void)
     CddApp_G.OffsetIv    = 0.0F;
     CddApp_G.OffsetIw    = 0.0F;
 
-    CddApp_G.CtrlMode    =  CDDAPP_CTRL_CLOSEDLOOP ; //CDDAPP_CTRL_CLOSEDLOOP;  CDDAPP_CTRL_CLOSEDLOOP
-    CddApp_G.SpeedRefRpm =  800.0F;
+    CddApp_G.CtrlMode    =  CDDAPP_CTRL_CLOSEDLOOP; //CDDAPP_CTRL_CLOSEDLOOP;  CDDAPP_CTRL_CLOSEDLOOP
+    CddApp_G.SpeedRefRpm =  1200.0F;
     CddApp_G.SensorReadingBitField = 0x0U;
 
     /* Re-entrant / repeated call guard: CDDAPP_INIT_PENDING = 0 (set by .bss at reset) */

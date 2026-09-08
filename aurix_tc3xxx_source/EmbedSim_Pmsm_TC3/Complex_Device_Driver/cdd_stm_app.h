@@ -14,8 +14,8 @@
  *
  *              Typical non-blocking timeout pattern:
  *              \code
- *                  uint64_T dl = CddStm_GetDeadline(TimeConst_10ms);
- *                  while (CddStm_IsDeadlineElapsed(dl) == 0x0U) { ; }
+ *                  uint64_T deadline = CddStm_GetDeadline(TimeConst_10ms);
+ *                  while (CddStm_IsDeadlineElapsed(deadline) == 0x0U) { ; }
  *              \endcode
  *
  * \note        MISRA C:2012 compliance:
@@ -25,6 +25,26 @@
  *              MISRA C:2012 deviations:
  *              - DEV-STM-001  Rule 8.4 : Stm_00_Cmp_00_Isr has no matching extern
  *                             declaration; installed exclusively via EMBED_SIM_INTERRUPT().
+ *
+ * \note        EmbedSim naming convention:
+ *              - Functions      : Pascal_Snake_Case
+ *              - Parameters     : PascalCase
+ *              - Output pointers: PascalCasePtr
+ *              - Local variables: Lower camelCase
+ *              - Struct members : PascalCase
+ *              - Macros         : UPPER_SNAKE_CASE
+ *              - Typedefs       : Pascal_Snake_Case_T
+ *
+ * \note        EmbedSim code style:
+ *              - Indentation    : 4 spaces (no tabs)
+ *              - Line width     : Max 120 characters
+ *              - Braces         : Same line for functions, next line for control structures
+ *              - Comments       : Doxygen style for documentation
+ *              - File headers   : Block comments with \file, \brief, \details, \note, \version, etc.
+ *              - Function docs  : \brief, \details, \param[in], \param[out], \return
+ *              - Pointer alignment: Type* const PtrName (space before *, no space after)
+ *              - Type suffix    : _T for typedefs, _G for global variables
+ *              - Constants      : UPPER_SNAKE_CASE
  *
  * \copyright   Copyright (C) EmbedSim Project / Paul Abraham 2024
  *              https://github.com/vectorsim/embed_sim_project
@@ -44,19 +64,19 @@
  *********************************************************************************************************************/
 
 /** \brief  Total number of time-constant entries in CddStm_TimeTable_G.    */
-#define TIMER_COUNT         (11)
+#define TIMER_COUNT         (11U)
 
-#define TIMER_INDEX_10NS    (0)    /**< Index — 10 ns time constant          */
-#define TIMER_INDEX_100NS   (1)    /**< Index — 100 ns time constant         */
-#define TIMER_INDEX_1US     (2)    /**< Index — 1 µs time constant           */
-#define TIMER_INDEX_10US    (3)    /**< Index — 10 µs time constant          */
-#define TIMER_INDEX_100US   (4)    /**< Index — 100 µs time constant         */
-#define TIMER_INDEX_1MS     (5)    /**< Index — 1 ms time constant (ISR arm) */
-#define TIMER_INDEX_10MS    (6)    /**< Index — 10 ms time constant          */
-#define TIMER_INDEX_100MS   (7)    /**< Index — 100 ms time constant         */
-#define TIMER_INDEX_1S      (8)    /**< Index — 1 s time constant            */
-#define TIMER_INDEX_10S     (9)    /**< Index — 10 s time constant           */
-#define TIMER_INDEX_100S    (10)   /**< Index — 100 s time constant          */
+#define TIMER_INDEX_10NS    (0U)    /**< Index — 10 ns time constant          */
+#define TIMER_INDEX_100NS   (1U)    /**< Index — 100 ns time constant         */
+#define TIMER_INDEX_1US     (2U)    /**< Index — 1 µs time constant           */
+#define TIMER_INDEX_10US    (3U)    /**< Index — 10 µs time constant          */
+#define TIMER_INDEX_100US   (4U)    /**< Index — 100 µs time constant         */
+#define TIMER_INDEX_1MS     (5U)    /**< Index — 1 ms time constant (ISR arm) */
+#define TIMER_INDEX_10MS    (6U)    /**< Index — 10 ms time constant          */
+#define TIMER_INDEX_100MS   (7U)    /**< Index — 100 ms time constant         */
+#define TIMER_INDEX_1S      (8U)    /**< Index — 1 s time constant            */
+#define TIMER_INDEX_10S     (9U)    /**< Index — 10 s time constant           */
+#define TIMER_INDEX_100S    (10U)   /**< Index — 100 s time constant          */
 
 /*--------------------------------------------------------------------------------------------------------------------
  * CddStm_TimeTable_G — extern array declaration
@@ -127,10 +147,10 @@ extern uint64_T CddStm_GetDeadline(uint64_T TimeOut);
 /**
  * \brief   Tests whether an absolute deadline has been reached or exceeded.
  *
- * \param[in]  DeadLine  Absolute STM tick deadline from CddStm_GetDeadline().
- * \return  0x1U if current time > DeadLine, 0x0U otherwise.
+ * \param[in]  Deadline  Absolute STM tick deadline from CddStm_GetDeadline().
+ * \return  0x1U if current time > Deadline, 0x0U otherwise.
  */
-extern uint32_T CddStm_IsDeadlineElapsed(uint64_T DeadLine);
+extern uint32_T CddStm_IsDeadlineElapsed(uint64_T Deadline);
 
 /**
  * \brief   Busy-wait delay of the specified number of microseconds.
