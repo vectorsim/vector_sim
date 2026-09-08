@@ -10,12 +10,12 @@ import math
 from pathlib import Path
 
 # Path setup
-from _path_utils import get_project_root, get_embedsim_import_path, get_current_parent
+from _path_utils import get_project_root, get_embedsim_import_path, get_current_parent, get_pmsm_path, get_pmsm_c_src_path, get_modelica_path
 
 _HERE = get_current_parent()
 _ROOT = get_project_root()
-_PMSM = _ROOT / "pmsm"
-_C_SRC = _PMSM / "c_src"
+_PMSM = get_pmsm_path()
+_C_SRC = get_pmsm_c_src_path()
 
 for _p in (get_embedsim_import_path(), str(_PMSM), str(_C_SRC)):
     if _p not in sys.path:

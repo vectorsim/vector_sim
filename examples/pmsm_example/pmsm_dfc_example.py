@@ -17,19 +17,19 @@ from typing import Optional, Dict, Any
 # ================================================================
 # Path setup
 # ================================================================
-from _path_utils import get_project_root, get_embedsim_import_path, get_current_parent
+from _path_utils import get_project_root, get_embedsim_import_path, get_current_parent, get_pmsm_path, get_pmsm_c_src_path, get_modelica_path
 
 _HERE = get_current_parent()
 _ROOT = get_project_root()
-_PMSM = _ROOT / "pmsm"
-_C_SRC = _PMSM / "c_src"
+_PMSM = get_pmsm_path()
+_C_SRC = get_pmsm_c_src_path()
 
 for _p in (get_embedsim_import_path(), str(_PMSM), str(_C_SRC)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
 # FMU path
-FMU_PATH = str(_ROOT / "pmsm" / "modelica" / "PMSM_Plant_FMU.fmu")
+FMU_PATH = get_modelica_path("PMSM_Plant_FMU.fmu")
 
 # ================================================================
 # Imports
@@ -295,28 +295,6 @@ def display_motor_state(t: float, state: dict, prefix: str = "", verbose: bool =
     # Build basic line with available info
     mode_str = "CLOSED" if closed_loop else "OPEN"
     line = f"{prefix}[{t:6.2f}s] {mode_str}  ω={speed:6.1f} RPM"
-
-    # Add extra fields if present (Python state has more)
-    if is_python_state:
-        speed_ref = state.get('speed_ref_rpm', 0.0)
-        id_val = state.get('id', 0.0)
-        iq_val = state.get('iq', 0.0)
-        torque = state.get('torque_total', 0.0)
-        spin_counter = state.get('spinning_counter', 0)
-        speed_error = state.get('speed_error_rpm', 0.0)
-        line += (
-            f"  ω_ref={speed_ref:6.1f}  "
-            f"Id={id_val:6.3f}A  Iq={iq_val:6.3f}A  "
-            f"T={torque:6.3f}Nm  spin={spin_counter:6d}  "
-            f"duty=({duty_u:.3f},{duty_v:.3f},{duty_w:.3f})"
-        )
-        if verbose:
-            line += f"  [err={speed_error:6.1f} RPM]"
-    else:
-        # C state: only show duties and loop counter
-        loop_cnt = state.get('loop_counter', 0)
-        line += f"  duty=({duty_u:.3f},{duty_v:.3f},{duty_w:.3f})  loop={loop_cnt}"
-
     print(line)
 
 

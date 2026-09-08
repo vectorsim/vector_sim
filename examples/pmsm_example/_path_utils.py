@@ -41,7 +41,7 @@ def get_modelica_path(name: str) -> str:
     Returns full path to a Modelica file in examples/rlc_fmu/modelica.
     """
     root = get_project_root()
-    return str(root / "examples" / "rlc_fmu" / "modelica" / name)
+    return str(get_pmsm_path() / "modelica" / name)
 
 def get_current_parent() -> Path:
     """
@@ -49,3 +49,17 @@ def get_current_parent() -> Path:
     """
     current_path = Path(__file__).resolve()
     return current_path.parent
+
+
+
+def get_pmsm_path() -> Path:
+    """
+    Returns pmsm file path for the current Python process.
+    """
+    return get_project_root() / "pmsm"
+
+def get_pmsm_c_src_path() -> Path:
+    """
+    Returns pmsm c_src file path for the current Python process.
+    """
+    return get_pmsm_path() / "c_src"
